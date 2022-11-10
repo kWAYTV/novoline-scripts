@@ -17,6 +17,8 @@ module.addBooleanProperty("smartspeed", "Smart Speed", false);
 
 // Variables
 var doLowHp = false;
+var smartspeed = false;
+var smartaura = false;
 var apTimer = timer_util.getTimer();
 var chatTimer = timer_util.getTimer();
 var counterTimer = timer_util.getTimer();
@@ -66,7 +68,7 @@ module.onEvent("disable",function(){
 // Low HP Warning function
 module.onEvent("playerPostUpdateEvent",function(event){
     if (module.getProperty("lowhp").getBoolean()) {
-        log("Health:" + player.getHealth())
+        client.print("Health: " + player.getHealth())
         if (player.getHealth() < 10 && doLowHp == false) {
             client.postNotification("Low HP Warning!" ,"Your HP is under 10", 3000, WARNING)
             log("\u00A7cYour HP is under 10!")
@@ -172,7 +174,10 @@ module.onEvent("packetSendEvent",function(event){
     }
     if (module.getProperty("print_hitlogs").getBoolean()) {
         if (outprint_hitlogs_timer.delay(1000)) {
-            player.sendMessage("Hit: " + client.getAuraTarget().getName() + " " + "Position: " + finalHitbox + " " + "HitRate: " + hitrate + " " + "HurtResistantTime: " + client.getAuraTarget().hurtResistantTime + " " +"X: " + client.getAuraTarget().posX.toFixed(2) + " "  + "Y: " + client.getAuraTarget().posY.toFixed(2) + " " + "Z: " + client.getAuraTarget().posZ.toFixed(2) + " " + "Hurt: " + (20.00 - entity_util.getHealth(client.getAuraTarget())).toFixed(2) + " " + "Health: " + entity_util.getHealth(client.getAuraTarget()).toFixed(2));
+            player.sendMessage("Hit: " + client.getAuraTarget().getName() + " " + "Position: " + finalHitbox + " " + "HitRate: " + hitrate
+            + " " + "HurtResistantTime: " + client.getAuraTarget().hurtResistantTime + " " +"X: " + client.getAuraTarget().posX.toFixed(2) + " " 
+            + "Y: " + client.getAuraTarget().posY.toFixed(2) + " " + "Z: " + client.getAuraTarget().posZ.toFixed(2) + " " + "Hurt: " + (20.00 - entity_util.getHealth(client.getAuraTarget())).toFixed(2) + " " + "Health: " +
+            entity_util.getHealth(client.getAuraTarget()).toFixed(2));
             outprint_hitlogs_timer.reset();
         }
     }
@@ -203,12 +208,14 @@ module.onEvent("playerPostUpdateEvent",function(event){
             if (client.isEnabled("Killaura")) {
                 smartaura = true;
                 client.toggleModule("Killaura");
-                log("(Smart Aura) Aura Disable")	
+                log("(Smart Aura) Aura Disabled")
+                client.postNotification("Smart Aura" ,"Aura Disabled", 3000, WARNING)	
         }
         } else if (smartaura) {
             client.toggleModule("Killaura");
             smartaura = false;
-            log("(Smart Aura) Aura Enable")
+            log("(Smart Aura) Aura Enabled")
+            client.postNotification("Smart Aura" ,"Aura Enabled", 3000, SUCCESS)
         }
     }
 });
