@@ -66,6 +66,7 @@ module.onEvent("disable",function(){
 // Low HP Warning function
 module.onEvent("playerPostUpdateEvent",function(event){
     if (module.getProperty("lowhp").getBoolean()) {
+        log("Health:" + player.getHealth())
         if (player.getHealth() < 10 && doLowHp == false) {
             client.postNotification("Low HP Warning!" ,"Your HP is under 10", 3000, WARNING)
             log("\u00A7cYour HP is under 10!")
@@ -171,10 +172,7 @@ module.onEvent("packetSendEvent",function(event){
     }
     if (module.getProperty("print_hitlogs").getBoolean()) {
         if (outprint_hitlogs_timer.delay(1000)) {
-            player.sendMessage("Hit: " + client.getAuraTarget().getName() + " " + "Position: " + finalHitbox + " " + "HitRate: " + hitrate
-            + " " + "HurtResistantTime: " + client.getAuraTarget().hurtResistantTime + " " +"X: " + client.getAuraTarget().posX.toFixed(2) + " " 
-            + "Y: " + client.getAuraTarget().posY.toFixed(2) + " " + "Z: " + client.getAuraTarget().posZ.toFixed(2) + " " + "Hurt: " + (20.00 - entity_util.getHealth(client.getAuraTarget())).toFixed(2) + " " + "Health: " +
-            entity_util.getHealth(client.getAuraTarget()).toFixed(2));
+            player.sendMessage("Hit: " + client.getAuraTarget().getName() + " " + "Position: " + finalHitbox + " " + "HitRate: " + hitrate + " " + "HurtResistantTime: " + client.getAuraTarget().hurtResistantTime + " " +"X: " + client.getAuraTarget().posX.toFixed(2) + " "  + "Y: " + client.getAuraTarget().posY.toFixed(2) + " " + "Z: " + client.getAuraTarget().posZ.toFixed(2) + " " + "Hurt: " + (20.00 - entity_util.getHealth(client.getAuraTarget())).toFixed(2) + " " + "Health: " + entity_util.getHealth(client.getAuraTarget()).toFixed(2));
             outprint_hitlogs_timer.reset();
         }
     }
