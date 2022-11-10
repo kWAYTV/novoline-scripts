@@ -63,7 +63,7 @@ module.onEvent("enable",function(){
 module.onEvent("disable",function(){
     log("Thank you! Come again")
     client.postNotification("Goodbye","Thank you! Come again",3000,SUCCESS)
-})
+});
 
 // Low HP Warning function
 module.onEvent("playerPostUpdateEvent",function(event){
@@ -81,7 +81,7 @@ module.onEvent("playerPostUpdateEvent",function(event){
     }
 })
 
-// Approach warning function
+// Nearby warning function
 module.onEvent("playerPostUpdateEvent",function(event){
     if (module.getProperty("nearbyw").getBoolean()) {
         var entities = world.getEntityList();
@@ -103,13 +103,13 @@ module.onEvent("playerPostUpdateEvent",function(event){
             if (client.isEnabled("Step")) {
                 smartspeed = true;
                 client.toggleModule("Step");
-                log("(Smart Step) Step Disable")	
-                client.postNotification("Smart Step" ,"Step Disabled", 3000, WARNING)	
+                log("(Smart Step) Step disabled")	
+                client.postNotification("Smart Step" ,"Step disabled", 3000, WARNING)	
         }
         } else if (smartspeed) {
             client.toggleModule("Step");
             smartspeed = false;
-            log("(Smart Step) Step Enable")
+            log("(Smart Step) Step Enabled")
             client.postNotification("Smart Step" ,"Step Enabled", 3000, SUCCESS)
         }
     }
