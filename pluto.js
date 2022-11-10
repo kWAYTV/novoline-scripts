@@ -188,12 +188,12 @@ module.onEvent("playerPostUpdateEvent",function(event){
             if (client.isEnabled("Step")) {
                 smartspeed = true;
                 client.toggleModule("Step");
-                notification("(Smart Step) Step Disable")	
+                log("(Smart Step) Step Disable")	
         }
         } else if (smartspeed) {
             client.toggleModule("Step");
             smartspeed = false;
-            notification("(Smart Step) Step Enable")
+            log("(Smart Step) Step Enable")
         }
     }
 });
@@ -205,12 +205,12 @@ module.onEvent("playerPostUpdateEvent",function(event){
             if (client.isEnabled("Killaura")) {
                 smartaura = true;
                 client.toggleModule("Killaura");
-                notification("(Smart Aura) Aura Disable")	
+                log("(Smart Aura) Aura Disable")	
         }
         } else if (smartaura) {
             client.toggleModule("Killaura");
             smartaura = false;
-            notification("(Smart Aura) Aura Enable")
+            log("(Smart Aura) Aura Enable")
         }
     }
 });
