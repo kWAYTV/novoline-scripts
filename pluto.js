@@ -3,17 +3,17 @@ var module = script.registerModule("Pluto.js", MISC);
 module.addBooleanProperty("lowhp", "Low hp warning", false);
 module.addBooleanProperty("nearbyw", "Nearby warning", false);
 module.addIntegerProperty("set_R","Nearby warning range", 5, 1, 8, 1);
+module.addBooleanProperty("smartaura", "Smart Aura", false);
+module.addBooleanProperty("smartspeed", "Smart Speed", false);
+module.addBooleanProperty("fastuse", "Fast use", false);
 module.addBooleanProperty("spammer", "Chat spammer", false);
 module.addIntegerProperty("set_I","Chat spammer interval", 5, 1, 10, 1);
-module.addBooleanProperty("fastuse", "Fast use", false);
 module.addBooleanProperty("timecounter", "Time Counter", false);
 module.addStringProperty("timecounterstyle", "Time Counter Style", "Short", ["Short", "Full"]);
 module.addDoubleProperty("Time Counter X","Time Counter X", 100, 10, 1000, 0.05)
 module.addDoubleProperty("Time Counter Y","Time Counter Y", 100, 10, 1000, 0.05)
 module.addBooleanProperty("hitlogs", "Hit Logs", false);
 module.addBooleanProperty("print_hitlogs", "Send hitlogs to chat", false);
-module.addBooleanProperty("smartaura", "Smart Aura", false);
-module.addBooleanProperty("smartspeed", "Smart Speed", false);
 
 // Variables
 var doLowHp = false;
@@ -68,7 +68,7 @@ module.onEvent("disable",function(){
 // Low HP Warning function
 module.onEvent("playerPostUpdateEvent",function(event){
     if (module.getProperty("lowhp").getBoolean()) {
-        client.print("Health: " + player.getHealth())
+        log("Health: " + player.getHealth())
         if (player.getHealth() < 10 && doLowHp == false) {
             client.postNotification("Low HP Warning!" ,"Your HP is under 10", 3000, WARNING)
             log("\u00A7cYour HP is under 10!")
@@ -82,7 +82,7 @@ module.onEvent("playerPostUpdateEvent",function(event){
 })
 
 // Approach warning function
-module.onEvent("playerPreUpdateEvent",function(event){
+module.onEvent("playerPostUpdateEvent",function(event){
     if (module.getProperty("nearbyw").getBoolean()) {
         var entities = world.getEntityList();
         var i;
@@ -96,12 +96,40 @@ module.onEvent("playerPreUpdateEvent",function(event){
     }
 });
 
-// Chat spammer function
+// Smart step function
 module.onEvent("playerPostUpdateEvent",function(event){
-    if (module.getProperty("spammer").getBoolean()) {
-        if (chatTimer.delay(module.getProperty("set_I").getInteger() * 1000)) {
-            player.sendMessage("kwayservices.top - Are you winning, son?")
-            chatTimer.reset();
+    if (module.getProperty("smartspeed").getBoolean()) {
+        if (client.isEnabled("Speed")) {
+            if (client.isEnabled("Step")) {
+                smartspeed = true;
+                client.toggleModule("Step");
+                log("(Smart Step) Step Disable")	
+                client.postNotification("Smart Step" ,"Step Disabled", 3000, WARNING)	
+        }
+        } else if (smartspeed) {
+            client.toggleModule("Step");
+            smartspeed = false;
+            log("(Smart Step) Step Enable")
+            client.postNotification("Smart Step" ,"Step Enabled", 3000, SUCCESS)
+        }
+    }
+});
+
+// Smart aura function
+module.onEvent("playerPostUpdateEvent",function(event){
+    if (module.getProperty("smartaura").getBoolean()) {
+        if (client.isEnabled("Scaffold")) {
+            if (client.isEnabled("Killaura")) {
+                smartaura = true;
+                client.toggleModule("Killaura");
+                log("(Smart Aura) Aura Disabled")
+                client.postNotification("Smart Aura" ,"Aura Disabled", 3000, WARNING)	
+        }
+        } else if (smartaura) {
+            client.toggleModule("Killaura");
+            smartaura = false;
+            log("(Smart Aura) Aura Enabled")
+            client.postNotification("Smart Aura" ,"Aura Enabled", 3000, SUCCESS)
         }
     }
 });
@@ -120,6 +148,16 @@ module.onEvent("playerPreUpdateEvent",function(event){
                 connection.sendPacket("0x03",false);
                 connection.sendPacket("0x03",true);
             }
+        }
+    }
+});
+
+// Chat spammer function
+module.onEvent("playerPostUpdateEvent",function(event){
+    if (module.getProperty("spammer").getBoolean()) {
+        if (chatTimer.delay(module.getProperty("set_I").getInteger() * 1000)) {
+            player.sendMessage("kwayservices.top - Are you winning, son?")
+            chatTimer.reset();
         }
     }
 });
@@ -182,40 +220,4 @@ module.onEvent("packetSendEvent",function(event){
         }
     }
 }
-});
-
-// Smart step function
-module.onEvent("playerPostUpdateEvent",function(event){
-    if (module.getProperty("smartspeed").getBoolean()) {
-        if (client.isEnabled("Speed")) {
-            if (client.isEnabled("Step")) {
-                smartspeed = true;
-                client.toggleModule("Step");
-                log("(Smart Step) Step Disable")	
-        }
-        } else if (smartspeed) {
-            client.toggleModule("Step");
-            smartspeed = false;
-            log("(Smart Step) Step Enable")
-        }
-    }
-});
-
-// Smart aura function
-module.onEvent("playerPostUpdateEvent",function(event){
-    if (module.getProperty("smartaura").getBoolean()) {
-        if (client.isEnabled("Scaffold")) {
-            if (client.isEnabled("Killaura")) {
-                smartaura = true;
-                client.toggleModule("Killaura");
-                log("(Smart Aura) Aura Disabled")
-                client.postNotification("Smart Aura" ,"Aura Disabled", 3000, WARNING)	
-        }
-        } else if (smartaura) {
-            client.toggleModule("Killaura");
-            smartaura = false;
-            log("(Smart Aura) Aura Enabled")
-            client.postNotification("Smart Aura" ,"Aura Enabled", 3000, SUCCESS)
-        }
-    }
 });
