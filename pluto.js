@@ -1,10 +1,10 @@
 // Create the module
 var module = script.registerModule("Pluto.js", MISC);
 module.addBooleanProperty("lowhp", "Low HP warning", false);
-module.addBooleanProperty("nearbyw", "Nearby player warning", false);
-module.addIntegerProperty("set_R","Nearby warning range", 5, 1, 8, 1);
+module.addBooleanProperty("nearby", "Nearby player warning", false);
+module.addIntegerProperty("set_R","Nearby warning range", 5, 1, 10, 1);
 module.addBooleanProperty("smartaura", "Smart Aura", false);
-module.addBooleanProperty("smartspeed", "Smart Speed", false);
+module.addBooleanProperty("smartstep", "Smart Step", false);
 module.addBooleanProperty("fastuse", "Fast use", false);
 module.addBooleanProperty("spammer", "Chat spammer", false);
 module.addIntegerProperty("set_I","Chat spammer interval", 5, 1, 10, 1);
@@ -17,9 +17,9 @@ module.addBooleanProperty("print_hitlogs", "Send hitlogs to chat", false);
 
 // Variables
 var doLowHp = false;
-var smartspeed = false;
+var smartstep = false;
 var smartaura = false;
-var apTimer = timer_util.getTimer();
+var nearbyTimer = timer_util.getTimer();
 var chatTimer = timer_util.getTimer();
 var counterTimer = timer_util.getTimer();
 var hlogsTimer = timer_util.getTimer();
@@ -32,110 +32,76 @@ function log(text) {
     client.print("\u00a75\u00a7lPluto.js\u00A7f > " + text);
 }
 
-// HTTP Request function
-function request(url) {
-    try {
-        closeableHttpClient = org.apache.http.impl.client.HttpClients.createDefault();
-        httpGet = new org.apache.http.client.methods.HttpGet(url);
-        closeableHttpResponse = closeableHttpClient.execute(httpGet);
-        var response = org.apache.commons.io.IOUtils.toString(closeableHttpResponse.getEntity().getContent(), java.nio.charset.StandardCharsets.UTF_8);
-        if (response == "404: Not Found") {
-            log("Loaded! While making the http request.")
-        } else {
-            var json = JSON.parse(response);
-            return response
-        }
-    } catch (e) {
-        log("Error!: " + e.message);
-    }
-}
-
-// Script loading event
-module.onEvent("enable",function(){
-    var data = request("https://quotable.io/random?maxLength=150")
-    var json = JSON.parse(data);
-    log("Loaded! \n" + json.content + " - " + json.author);
-    client.postNotification("Welcome","Pluto.js enabled!",3000,SUCCESS)
-    player.jump()
-});
-
-// Script unloading event
-module.onEvent("disable",function(){
-    log("Thank you! Come again")
-    client.postNotification("Goodbye","Thank you! Come again",3000,SUCCESS)
-});
-
-// Low HP Warning function
-module.onEvent("playerPostUpdateEvent",function(event){
+function lowHp() {
     if (module.getProperty("lowhp").getBoolean()) {
-        log("Health: " + player.getHealth())
         if (player.getHealth() < 10 && doLowHp == false) {
             client.postNotification("Low HP Warning!" ,"Your HP is under 10", 3000, WARNING)
-            log("\u00A7cYour HP is under 10!")
+            log("\u00A7cYour HP is under 10!\u00A7f")
             doLowHp = true
         }else if (player.getHealth() > 10 && doLowHp == true) {
             client.postNotification("HP Warning" ,"Your HP is over 10 again", 3000, SUCCESS)
-            log("\u00A7aYou are no longer on low HP!")
+            log("\u00A7aYou are no longer on low HP!\u00A7f")
             doLowHp = false
         }
     }
-})
+}
 
 // Nearby warning function
-module.onEvent("playerPostUpdateEvent",function(event){
-    if (module.getProperty("nearbyw").getBoolean()) {
+function nearbyWarning() {
+    if (module.getProperty("nearby").getBoolean()) {
         var entities = world.getEntityList();
         var i;
         for(i = 0;i < entities.length;i++){
             if(player.getDistanceToEntity(entities[i]) < module.getProperty("set_R").getInteger() && entity_util.getName(entities[i]) != player.getName()){
-                if (apTimer.delay(1000) && entities[i] != null) {
-                log("\u00A7cWarning" + "\u00A7a	 " +entities[i].getName() + " \u00A7cis near!" + " \u00A7bDistance: \u00A7f" + Math.abs(player.getX() - entities[i].posX).toFixed(2)+ " blocks")
-                apTimer.reset();
+                if (nearbyTimer.delay(1000) && entities[i] != null) {
+                    log("\u00A7cWarning" + "\u00A7a	 " +entities[i].getName() + " \u00A7cis near!" + " \u00A7bDistance: \u00A7f" + Math.abs(player.getX() - entities[i].posX).toFixed(2)+ " blocks")
+                    nearbyTimer.reset();
             }
-        }}
-    }
-});
-
-// Smart step function
-module.onEvent("playerPostUpdateEvent",function(event){
-    if (module.getProperty("smartspeed").getBoolean()) {
-        if (client.isEnabled("Speed")) {
-            if (client.isEnabled("Step")) {
-                smartspeed = true;
-                client.toggleModule("Step");
-                log("(Smart Step) Step disabled")	
-                client.postNotification("Smart Step" ,"Step disabled", 3000, WARNING)	
         }
-        } else if (smartspeed) {
-            client.toggleModule("Step");
-            smartspeed = false;
-            log("(Smart Step) Step Enabled")
-            client.postNotification("Smart Step" ,"Step Enabled", 3000, SUCCESS)
         }
     }
-});
+}
 
 // Smart aura function
-module.onEvent("playerPostUpdateEvent",function(event){
+function smartAura() {
     if (module.getProperty("smartaura").getBoolean()) {
         if (client.isEnabled("Scaffold")) {
             if (client.isEnabled("Killaura")) {
                 smartaura = true;
                 client.toggleModule("Killaura");
-                log("(Smart Aura) Aura Disabled")
+                log("Smart aura disabled Killaura\u00A7f")
                 client.postNotification("Smart Aura" ,"Aura Disabled", 3000, WARNING)	
         }
         } else if (smartaura) {
             client.toggleModule("Killaura");
             smartaura = false;
-            log("(Smart Aura) Aura Enabled")
+            log("Smart aura enabled Killaura\u00A7f")
             client.postNotification("Smart Aura" ,"Aura Enabled", 3000, SUCCESS)
         }
     }
-});
+}
+
+// Smart step function
+function smartStep() {
+    if (module.getProperty("smartstep").getBoolean()) {
+        if (client.isEnabled("Speed")) {
+            if (client.isEnabled("Step")) {
+                smartstep = true;
+                client.toggleModule("Step");
+                log("Smart step disabled step\u00A7f")	
+                client.postNotification("Smart Step" ,"Step disabled", 3000, WARNING)	
+        }
+        } else if (smartstep) {
+            client.toggleModule("Step");
+            smartstep = false;
+            log("Smart step enabled step\u00A7f")
+            client.postNotification("Smart Step" ,"Step Enabled", 3000, SUCCESS)
+        }
+    }
+}
 
 // Fast use function
-module.onEvent("playerPreUpdateEvent",function(event){
+function fastUse(){
     if (module.getProperty("fastuse").getBoolean()) {
         if (player.getHeldItemDisplayName() === "Apple" || player.getHeldItemDisplayName() === "Golden Apple" 
         || player.getHeldItemDisplayName() === "Bread" || player.getHeldItemDisplayName() === "Cooked Chicken" 
@@ -150,20 +116,20 @@ module.onEvent("playerPreUpdateEvent",function(event){
             }
         }
     }
-});
+}
 
 // Chat spammer function
-module.onEvent("playerPostUpdateEvent",function(event){
+function chatSpammer() {
     if (module.getProperty("spammer").getBoolean()) {
         if (chatTimer.delay(module.getProperty("set_I").getInteger() * 1000)) {
             player.sendMessage("kwayservices.top - Are you winning, son?")
             chatTimer.reset();
         }
     }
-});
+}
 
 // Time counter function
-module.onEvent("render2DEvent",function(event){
+function timeCounter(){
     if (module.getProperty("timecounter").getBoolean()) {
         if(counterTimer.delay(1000)){
             timeCounterSeconds++
@@ -186,11 +152,11 @@ module.onEvent("render2DEvent",function(event){
             render_util.renderString(timeCounterHours + " " + fixedHours + " " + timeCounterMinutes + " " + fixedMinutes + " " + timeCounterSeconds + " " + fixedSeconds, module.getProperty("Time Counter X").getDouble(), module.getProperty("Time Counter Y").getDouble(), 0xffffff, true)
         }
     }
-});
+}
 
 // Hit logs function
 var outprint_hitlogs_timer = timer_util.getTimer();
-module.onEvent("packetSendEvent",function(event){
+function hitLogs() {
     var hitrate = Math.floor(Math.random() * 99 + 1);
     var getHitbox = Math.floor(Math.random() * 4 + 1);
     var finalHitbox = "";
@@ -220,4 +186,55 @@ module.onEvent("packetSendEvent",function(event){
         }
     }
 }
+}
+
+// HTTP Request function
+function request(url) {
+    try {
+        closeableHttpClient = org.apache.http.impl.client.HttpClients.createDefault();
+        httpGet = new org.apache.http.client.methods.HttpGet(url);
+        closeableHttpResponse = closeableHttpClient.execute(httpGet);
+        var response = org.apache.commons.io.IOUtils.toString(closeableHttpResponse.getEntity().getContent(), java.nio.charset.StandardCharsets.UTF_8);
+        if (response == "404: Not Found") {
+            log("Loaded! While making the http request.\u00A7f")
+        } else {
+            var json = JSON.parse(response);
+            return response
+        }
+    } catch (e) {
+        log("Error!: \u00A7f" + e.message);
+    }
+}
+
+// Script loading event
+module.onEvent("enable",function(){
+    var data = request("https://quotable.io/random?maxLength=150")
+    var json = JSON.parse(data);
+    log("Loaded! \n" + json.content + " - " + json.author);
+    client.postNotification("Welcome","Pluto.js enabled!",3000,SUCCESS)
+    player.jump()
 });
+
+// Script unloading event
+module.onEvent("disable",function(){
+    log("Thank you! Come again")
+    client.postNotification("Goodbye","Thank you! Come again",3000,SUCCESS)
+});
+
+// Event listeners
+module.onEvent("playerPostUpdateEvent",function(event){
+    lowHp();
+    nearbyWarning();
+    smartAura();
+    smartStep();
+    chatSpammer();
+})
+module.onEvent("playerPreUpdateEvent",function(event){
+    fastUse();
+})
+module.onEvent("render2DEvent",function(event){
+    timeCounter();
+})
+module.onEvent("packetSendEvent",function(event){
+    hitLogs(event);
+})
