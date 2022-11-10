@@ -134,7 +134,7 @@ module.onEvent("render2DEvent",function(event){
                 timeCounterHours++
                 timeCounterMinutes = 0
             }
-            counterTtimer.reset()
+            counterTimer.reset()
         }
         if (timeCounterHours == 1) { var fixedHours = "hour"} else { var fixedHours = "hours"}
         if (timeCounterMinutes == 1) { var fixedMinutes = "minute"} else { var fixedMinutes = "minutes"}
