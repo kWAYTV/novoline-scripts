@@ -1,7 +1,7 @@
 // Create the module
 var module = script.registerModule("Pluto.js", MISC);
-module.addBooleanProperty("lowhp", "Low hp warning", false);
-module.addBooleanProperty("nearbyw", "Nearby warning", false);
+module.addBooleanProperty("lowhp", "Low HP warning", false);
+module.addBooleanProperty("nearbyw", "Nearby player warning", false);
 module.addIntegerProperty("set_R","Nearby warning range", 5, 1, 8, 1);
 module.addBooleanProperty("smartaura", "Smart Aura", false);
 module.addBooleanProperty("smartspeed", "Smart Speed", false);
