@@ -185,8 +185,7 @@ function hitLogs() {
             outprint_hitlogs_timer.reset();
         }
     }
-}
-}
+}}
 
 // HTTP Request function
 function request(url) {
