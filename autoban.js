@@ -1,3 +1,4 @@
+// This script auto bans YOU in hypixel so be careful
 module = script.registerModule("AutoBan",EXPLOITS);
 
 module.onEvent("playerPreUpdateEvent",function(event){
