@@ -6,10 +6,6 @@ module.addIntegerProperty("set_R","Nearby warning range", 5, 1, 10, 1);
 module.addBooleanProperty("smartaura", "Smart Aura", false);
 module.addBooleanProperty("smartstep", "Smart Step", false);
 module.addBooleanProperty("fastuse", "Fast use", false);
-module.addBooleanProperty("vanillafly", "Vanilla Fly", false);
-module.addDoubleProperty("flyY", "Fly Y Speed", 0.42, 0, 10, 0.01);
-module.addDoubleProperty("flyX", "Fly X Speed", 0.42, 0, 10, 0.01);
-module.addBooleanProperty("stopfly", "Stop Velocity", false);
 module.addBooleanProperty("spammer", "Chat spammer", false);
 module.addIntegerProperty("set_I","Chat spammer interval", 5, 1, 10, 1);
 module.addBooleanProperty("timecounter", "Time Counter", false);
@@ -211,19 +207,6 @@ function hitLogs() {
     }
 }}
 
-// Vanilla fly function
-function vanillaFly(event, entity) {
-    if (module.getProperty("vanillafly").getBoolean()) {
-        var motiony = 0;
-        var setting = module.getProperty("flyY").getDouble();
-        motiony += keyboard.isKeyDown(keyboard.KEY_SPACE) ? setting : 0;
-        motiony -= (keyboard.isKeyDown(keyboard.KEY_LSHIFT) && entity.fallDistance > 3) ? setting : 0;
-        player.setMotionY(motiony);
-    } else if (!module.getProperty("vanillafly").getBoolean()) {
-        player.setMotionY(module.getProperty("stopfly").getBoolean() ? 0 : 0.42);
-    }
-}
-
 // Script loading event
 module.onEvent("enable",function(){
     var data = request("https://quotable.io/random?maxLength=150")
@@ -250,7 +233,6 @@ module.onEvent("playerPostUpdateEvent",function(event){
 
 // PlayerPreUpdate event
 module.onEvent("playerPreUpdateEvent",function(event){
-    vanillaFly(event);
     fastUse();
 })
 
@@ -262,9 +244,4 @@ module.onEvent("render2DEvent",function(event){
 // PacketSend event
 module.onEvent("packetSendEvent",function(event){
     hitLogs(event);
-})
-
-// Move event
-module.onEvent("moveEvent",function(event){
-    event.setMoveSpeed(module.getProperty("flyX").getDouble()); // vanilla fly
 })
