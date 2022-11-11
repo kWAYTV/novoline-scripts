@@ -6,6 +6,10 @@ module.addIntegerProperty("set_R","Nearby warning range", 5, 1, 10, 1);
 module.addBooleanProperty("smartaura", "Smart Aura", false);
 module.addBooleanProperty("smartstep", "Smart Step", false);
 module.addBooleanProperty("fastuse", "Fast use", false);
+module.addBooleanProperty("vanillafly", "Vanilla Fly", false);
+module.addDoubleProperty("flyY", "Fly Y Speed", 0.42, 0, 10, 0.01);
+module.addDoubleProperty("flyX", "Fly X Speed", 0.42, 0, 10, 0.01);
+module.addBooleanProperty("stopfly", "Stop Velocity", false);
 module.addBooleanProperty("spammer", "Chat spammer", false);
 module.addIntegerProperty("set_I","Chat spammer interval", 5, 1, 10, 1);
 module.addBooleanProperty("timecounter", "Time Counter", false);
@@ -16,6 +20,7 @@ module.addBooleanProperty("hitlogs", "Hit Logs", false);
 module.addBooleanProperty("print_hitlogs", "Send hitlogs to chat", false);
 
 // Variables
+var keyboard = org.lwjgl.input.Keyboard
 var doLowHp = false;
 var smartstep = false;
 var smartaura = false;
@@ -32,6 +37,25 @@ function log(text) {
     client.print("\u00a75\u00a7lPluto.js\u00A7f > " + text);
 }
 
+// HTTP Request function
+function request(url) {
+    try {
+        closeableHttpClient = org.apache.http.impl.client.HttpClients.createDefault();
+        httpGet = new org.apache.http.client.methods.HttpGet(url);
+        closeableHttpResponse = closeableHttpClient.execute(httpGet);
+        var response = org.apache.commons.io.IOUtils.toString(closeableHttpResponse.getEntity().getContent(), java.nio.charset.StandardCharsets.UTF_8);
+        if (response == "404: Not Found") {
+            log("Loaded! While making the http request.\u00A7f")
+        } else {
+            var json = JSON.parse(response);
+            return response
+        }
+    } catch (e) {
+        log("Error!: \u00A7f" + e.message);
+    }
+}
+
+// Low HP Warning function
 function lowHp() {
     if (module.getProperty("lowhp").getBoolean()) {
         if (player.getHealth() < 10 && doLowHp == false) {
@@ -54,7 +78,7 @@ function nearbyWarning() {
         for(i = 0;i < entities.length;i++){
             if(player.getDistanceToEntity(entities[i]) < module.getProperty("set_R").getInteger() && entity_util.getName(entities[i]) != player.getName()){
                 if (nearbyTimer.delay(1000) && entities[i] != null) {
-                    log("\u00A7cWarning" + "\u00A7a	 " +entities[i].getName() + " \u00A7cis near!" + " \u00A7bDistance: \u00A7f" + Math.abs(player.getX() - entities[i].posX).toFixed(2)+ " blocks")
+                    log("\u00A7cWarning" + "\u00A7a	 " + entities[i].getName() + " \u00A7cis near!" + " \u00A7bDistance: \u00A7f" + Math.abs(player.getX() - entities[i].posX).toFixed(2)+ " blocks")
                     nearbyTimer.reset();
             }
         }
@@ -187,21 +211,16 @@ function hitLogs() {
     }
 }}
 
-// HTTP Request function
-function request(url) {
-    try {
-        closeableHttpClient = org.apache.http.impl.client.HttpClients.createDefault();
-        httpGet = new org.apache.http.client.methods.HttpGet(url);
-        closeableHttpResponse = closeableHttpClient.execute(httpGet);
-        var response = org.apache.commons.io.IOUtils.toString(closeableHttpResponse.getEntity().getContent(), java.nio.charset.StandardCharsets.UTF_8);
-        if (response == "404: Not Found") {
-            log("Loaded! While making the http request.\u00A7f")
-        } else {
-            var json = JSON.parse(response);
-            return response
-        }
-    } catch (e) {
-        log("Error!: \u00A7f" + e.message);
+// Vanilla fly function
+function vanillaFly(event, entity) {
+    if (module.getProperty("vanillafly").getBoolean()) {
+        var motiony = 0;
+        var setting = module.getProperty("flyY").getDouble();
+        motiony += keyboard.isKeyDown(keyboard.KEY_SPACE) ? setting : 0;
+        motiony -= (keyboard.isKeyDown(keyboard.KEY_LSHIFT) && entity.fallDistance > 3) ? setting : 0;
+        player.setMotionY(motiony);
+    } else if (!module.getProperty("vanillafly").getBoolean()) {
+        player.setMotionY(module.getProperty("stopfly").getBoolean() ? 0 : 0.42);
     }
 }
 
@@ -220,7 +239,7 @@ module.onEvent("disable",function(){
     client.postNotification("Goodbye","Thank you! Come again",3000,SUCCESS)
 });
 
-// Event listeners
+// PlayerPostUpdate event
 module.onEvent("playerPostUpdateEvent",function(event){
     lowHp();
     nearbyWarning();
@@ -228,12 +247,24 @@ module.onEvent("playerPostUpdateEvent",function(event){
     smartStep();
     chatSpammer();
 })
+
+// PlayerPreUpdate event
 module.onEvent("playerPreUpdateEvent",function(event){
+    vanillaFly(event);
     fastUse();
 })
+
+// Render2D event
 module.onEvent("render2DEvent",function(event){
     timeCounter();
 })
+
+// PacketSend event
 module.onEvent("packetSendEvent",function(event){
     hitLogs(event);
+})
+
+// Move event
+module.onEvent("moveEvent",function(event){
+    event.setMoveSpeed(module.getProperty("flyX").getDouble()); // vanilla fly
 })
